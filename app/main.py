@@ -4,55 +4,53 @@ import os
 import pandas as pd
 from pydantic import BaseModel
 
-# 1. Configuración y carga
-app = FastAPI(title="Olist Analytics API - Predictor de Riesgo")
+app = FastAPI(title="Olist Analytics API - Predictor Real")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Cargamos los archivos que ya tienes en la carpeta
 model = joblib.load(os.path.join(BASE_DIR, "rf_best_model.joblib"))
 scaler = joblib.load(os.path.join(BASE_DIR, "scaler.joblib"))
 
-# 2. Esquema de datos: Lo que Pedro debe enviarnos
+# Obtenemos la lista exacta de lo que el modelo espera
+EXPECTED_COLUMNS = list(scaler.feature_names_in_)
+
+# Definimos los datos que Pedro (el usuario) realmente conoce
 class DatosCliente(BaseModel):
-    distancia_km: float
-    tiempo_entrega_est: float
-    precio_producto: float
-    valor_flete: float
+    price: float
+    freight_value: float
+    product_weight_g: float
+    estimated_days: float
 
 @app.get("/")
 def home():
-    return {"status": "Online", "modelo": "Cargado y listo"}
+    return {"status": "Online", "modelo": "Cargado", "columnas_modelo": len(EXPECTED_COLUMNS)}
 
-# 3. RUTA DE PREDICCIÓN: Aquí ocurre la magia
 @app.post("/predict")
 def predict(data: DatosCliente):
     try:
-        # 1. Crear el DataFrame con los datos de Pedro
-        df_input = pd.DataFrame([data.dict()])
+        # 1. Creamos un DataFrame con ceros usando los nombres exactos del modelo
+        df_final = pd.DataFrame(0.0, index=[0], columns=EXPECTED_COLUMNS)
         
-        # 2. RELLENO DE COLUMNAS FALTANTES
-        # Obtenemos los nombres de columnas que espera el modelo (del scaler)
-        expected_columns = scaler.feature_names_in_
+        # 2. Llenamos solo los datos que recibimos del usuario
+        # Usamos los nombres que aparecen en tu lista de COLUMNAS
+        df_final["price"] = data.price
+        df_final["freight_value"] = data.freight_value
+        df_final["product_weight_g"] = data.product_weight_g
+        df_final["estimated_days"] = data.estimated_days
         
-        # Creamos un DataFrame vacío con todas las columnas necesarias llenas de 0
-        df_final = pd.DataFrame(0, index=[0], columns=expected_columns)
-        
-        # Sobreescribimos solo los valores que Pedro nos envió
-        for col in df_input.columns:
-            if col in df_final.columns:
-                df_final[col] = df_input[col]
-        
-        # 3. Escalar y Predecir
+        # 3. Cálculos automáticos para variables derivadas (opcional pero ayuda)
+        df_final["total_item_value"] = data.price + data.freight_value
+        if data.price > 0:
+            df_final["freight_price_ratio"] = data.freight_value / data.price
+
+        # 4. Escalar y Predecir
         df_scaled = scaler.transform(df_final)
         prediccion = model.predict(df_scaled)[0]
         probabilidad = model.predict_proba(df_scaled)[0][1]
         
         return {
             "insatisfecho": int(prediccion),
-            "probabilidad_riesgo": round(float(probabilidad), 2),
-            "mensaje": "Alto riesgo" if prediccion == 1 else "Bajo riesgo"
+            "probabilidad_riesgo": round(float(probabilidad), 4),
+            "mensaje": "Crítico" if probabilidad > 0.6 else "Estable"
         }
     except Exception as e:
-        # Esto nos dirá exactamente qué falla si vuelve a pasar
-        print(f"Error detallado: {e}")
         raise HTTPException(status_code=500, detail=str(e))
