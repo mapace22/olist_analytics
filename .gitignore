@@ -15,3 +15,14 @@ venv/
 csv_data/
 *.joblib
 *.csv
+
+# Airflow - Logs y base de datos local
+logs/
+plugins/
+airflow.db
+airflow.cfg
+webserver_config.py
+unittests.cfg
+
+# Docker - Archivos de estado
+.docker-proxy/
