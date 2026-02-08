@@ -27,5 +27,39 @@ services:
     environment:
       - DATABASE_URL=postgresql://marcel:Proyecto28_password@db:5432/olist_db
 
+  # --- NUEVOS SERVICIOS DE AIRFLOW ---
+  airflow-webserver:
+    image: apache/airflow:2.7.1
+    container_name: olist_airflow_webserver
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      # Conexión a TU base de datos para que Airflow guarde sus procesos
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://marcel:Proyecto28_password@db:5432/olist_db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1
+    container_name: olist_airflow_scheduler
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://marcel:Proyecto28_password@db:5432/olist_db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+    command: scheduler
+
 volumes:
   pgdata:
