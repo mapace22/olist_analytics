@@ -1,23 +1,37 @@
 # 📊 Olist Analytics: Predicción de Riesgo de Insatisfacción
 
-Este proyecto integra un modelo de Machine Learning para predecir la insatisfacción del cliente en la plataforma Olist, permitiendo tomar acciones proactivas.
+Este proyecto integra un ecosistema de datos completo para predecir la insatisfacción del cliente en la plataforma Olist mediante Machine Learning y automatización industrial.
 
-## 🏗️ Estructura del Proyecto
-* **`app/`**: Contiene la API (**FastAPI**) y el modelo entrenado (`.joblib`).
-* **`sql_scripts/`**: Scripts de SQL para el procesamiento de datos (Bronze/Silver/Gold).
-* **`notebooks/`**: Experimentos iniciales y entrenamiento del modelo.
-* **`csv_data/`**: Datasets originales de Olist.
+## 🏗️ Estructura del Proyecto (Actualizada)
+
+* **app/**: API (FastAPI) y modelo entrenado (`RandomForest`).
+* **dags/**: Orquestación de procesos con **Apache Airflow**.
+* **sql_scripts/**: Lógica de transformación en base de datos.
+* **docker-compose.yml**: Configuración de todo el entorno (DB, API, Airflow).
 
 ## 🛠️ Tecnologías Principales
-* **FastAPI** & **Uvicorn**: Para servir el modelo en tiempo real.
-* **Scikit-learn**: Para la lógica de predicción (Random Forest).
-* **Git**: Para el control de versiones profesional.
 
-## 🚀 Cómo ejecutar
-1. **Activar entorno:** `source app/venv/bin/activate`
-2. **Instalar dependencias:** `pip install -r app/requirements.txt`
-3. **Iniciar API:** `uvicorn app.main:app --reload`
+* **FastAPI**: Servicio de predicciones en tiempo real.
+* **Apache Airflow**: Automatización y orquestación de tareas (ETL).
+* **PostgreSQL**: Almacenamiento de datos transaccionales y analíticos.
+* **Docker & Docker Compose**: Contenedorización de toda la infraestructura.
 
-## 📬 Próximos Pasos (Roadmap)
-* **Apache Airflow**: Automatización del flujo de datos.
-* **LangChain**: Interfaz de chat inteligente
+## 🚀 Cómo ejecutar (Modo Docker)
+
+Ya no es necesario activar entornos virtuales manualmente. Todo se levanta con un solo comando:
+
+1. **Levantar infraestructura:**
+   `docker-compose up -d`
+
+2. **Acceder a los servicios:**
+   - **API:** `http://localhost:8000`
+   - **Airflow:** `http://localhost:8080` (User: `admin` / Pass: `admin`)
+   - **Base de Datos:** Puerto `5432`
+
+## 📬 Estado del Proyecto
+
+- [x] Contenedorización de Base de Datos y API.
+- [x] Configuración de Apache Airflow en Docker.
+- [x] Prueba de conexión Airflow -> API (Exitosa: HTTP 200).
+- [ ] Implementación de DAG para procesamiento automático de ventas.
+- [ ] Integración con LangChain para interfaz de chat inteligente.
