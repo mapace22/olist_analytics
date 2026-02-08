@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:15
+    container_name: olist_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: marcel
+      POSTGRES_PASSWORD: Proyecto28_password
+      POSTGRES_DB: olist_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - "./csv_data:/datos"
+
+volumes:
+  pgdata:

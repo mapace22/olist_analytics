@@ -1,0 +1,17 @@
+# Python - Archivos temporales y de sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Datos y Modelos Pesados
+csv_data/
+*.joblib
+*.csv
